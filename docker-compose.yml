@@ -2,11 +2,26 @@ version: '3'
 
 services:
   app:
-    container_name: app
-    build: 
+    build:
       context: ./App
-    ports:
-      - "8000:8000"
     volumes:
       - ./App:/App
-    command: gunicorn --bind 0.0.0.0:8000 app:app
+    # Not Exposing Any Port Since Both `app` & `nginx` are on the same network `my_network_v1`
+    # ports:
+    #   - "5011"
+    command: gunicorn --bind 0.0.0.0:5011 app:app
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+
+networks:
+  default:
+    external:
+      name: my_network_v1
